@@ -61,18 +61,6 @@ public class KeyValueDataStore implements Serializable {
         return decodedStr;
     }
 
-    // private void createFile(String path) {
-    // Path filePath = Paths.get(path);
-    // try {
-    // Files.createDirectories(filePath.getParent());
-    // Files.createFile(filePath);
-    // } catch (FileAlreadyExistsException fae) {
-    // // Don't want to throw exception if File already exists
-    // } catch (IOException e) {
-    // e.printStackTrace();
-    // }
-    // }
-
     // private void preProcess(String dbFilePath, String metaFilePath) {
     // this.createFile(dbFilePath);
     // this.createFile(metaFilePath);
