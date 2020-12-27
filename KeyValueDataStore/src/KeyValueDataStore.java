@@ -17,21 +17,18 @@ public class KeyValueDataStore implements Serializable {
     private static Scanner scanner = new Scanner(System.in);
     private static final KeyValueDataStore INSTANCE = new KeyValueDataStore();
     private static final long ONE_SEC_IN_MILLIS = 1000; // 1 sec equals to 1000 millisecs
-    private static Map<String, String> keyMap = new TreeMap<>(); // Making the class Thread-safe with the use of map
-                                                                 // here.
-    private static Map<String, String> metadataMap = new TreeMap<>(); // Also here we have used Treemap to keep the
-                                                                      // values in the datastore in sorted order.
+    private static Map<String, String> keyMap = new TreeMap<>();
+    // Making the class Thread-safe with the use of map here
+    private static Map<String, String> metadataMap = new TreeMap<>();
+    // Also here we have used Treemap to keep the values in the datastore in sorted
+    // order.
     static String DELIMITER = ":";
 
     // fille paths for data storgae .. can only be changed from here
     private static String dbFilePath = System.getProperty("KeyValueDataStore.dbfilepath", "./data/db.txt");
     private static String metaFilePath = System.getProperty("KeyValueDataStore.metafilepath", "./data/db-meta.txt");
-    private static Integer defaultTTL = Integer.valueOf(System.getProperty("KeyValueDataStore.defaultTTL", "604800"));// 7
-                                                                                                                      // days
-                                                                                                                      // equals
-                                                                                                                      // to
-                                                                                                                      // 604800
-                                                                                                                      // seconds
+    private static Integer defaultTTL = Integer.valueOf(System.getProperty("KeyValueDataStore.defaultTTL", "604800"));
+    // 7 days equals to 604800 seconds
 
     private KeyValueDataStore() {
     }
@@ -40,10 +37,10 @@ public class KeyValueDataStore implements Serializable {
         return KeyValueDataStore.INSTANCE;
     }
 
-    @SuppressWarnings("unused")
-    private KeyValueDataStore readResolve() {
-        return KeyValueDataStore.INSTANCE;
-    }
+    // @SuppressWarnings("unused")
+    // private KeyValueDataStore readResolve() {
+    // return KeyValueDataStore.INSTANCE;
+    // }
 
     private String createKeyValue(String key, String value) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -64,23 +61,31 @@ public class KeyValueDataStore implements Serializable {
         return decodedStr;
     }
 
-    private void createFile(String path) {
-        Path filePath = Paths.get(path);
-        try {
-            Files.createDirectories(filePath.getParent());
-            Files.createFile(filePath);
-        } catch (FileAlreadyExistsException fae) {
-            // Don't want to throw exception if File already exists
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    // private void createFile(String path) {
+    // Path filePath = Paths.get(path);
+    // try {
+    // Files.createDirectories(filePath.getParent());
+    // Files.createFile(filePath);
+    // } catch (FileAlreadyExistsException fae) {
+    // // Don't want to throw exception if File already exists
+    // } catch (IOException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
-    private void preProcess(String dbFilePath, String metaFilePath) {
-        this.createFile(dbFilePath);
-        this.createFile(metaFilePath);
-        this.keyMap = Functions.getAllLinesFromFile(dbFilePath);
-        this.metadataMap = Functions.getAllLinesFromFile(metaFilePath);
+    // private void preProcess(String dbFilePath, String metaFilePath) {
+    // this.createFile(dbFilePath);
+    // this.createFile(metaFilePath);
+    // this.keyMap = Functions.getAllLinesFromFile(dbFilePath);
+    // this.metadataMap = Functions.getAllLinesFromFile(metaFilePath);
+    // }
+
+    private void DeleteKey(String key) {
+        Functions.deleteLineInFile(dbFilePath, key);
+        keyMap.remove(key);
+        Functions.deleteLineInFile(metaFilePath, key);
+        metadataMap.remove(key);
+        System.err.println("FAILED: Key expired and it has been removed from DataStore");
     }
 
     public static void main(String[] args) {
@@ -128,6 +133,7 @@ public class KeyValueDataStore implements Serializable {
                         System.out.println(
                                 "Enter the Time To Live duration (in seconds) of this key [type 0 for default that is 7 days]: ");
                         TTLVal = scanner.nextLong();
+
                         if (TTLVal <= 0) { // edge case 1 settingttl valto default 7 days
                             System.out.println("Setting TTL value to default i.e 7 days");
                             TTLVal = cal.getTimeInMillis() + (defaultTTL * ONE_SEC_IN_MILLIS);
@@ -144,8 +150,7 @@ public class KeyValueDataStore implements Serializable {
                                     KeyValueDataStore.INSTANCE.createKeyWithTTL(key, TTLVal), true);
                             metadataMap.put(key, TTLVal.toString());
                             if (result)
-                                System.out.println(
-                                        "--> SUCCESS: Key-Value pair has been added successfully to DataStore");
+                                System.out.println("--> SUCCESS: Key-Value pair has been added successfully");
                         } else {
                             System.err.println(
                                     "--> FAILED! : Reason can be File doesn't have write permission or File is too big to append data.\n");
@@ -153,9 +158,32 @@ public class KeyValueDataStore implements Serializable {
                         break;
 
                     case 2:
+                        System.out.println("Enter the key: ");
+                        key = scanner.nextLine();
+                        if (key == "") {
+                            System.err.println("--> FAILED! : Key field can't be empty. Try again!");
+                            continue;
+                        }
+                        if (!keyMap.containsKey(key)) {
+                            System.err.println("--> FAILED RETRIEVAL! : key is not present in the Data Store.");
+                            continue;
+                        }
+                        TTLVal = Long.valueOf(metadataMap.get(key));
+                        if (cal.getTimeInMillis() > TTLVal) {
+                            KeyValueDataStore.INSTANCE.DeleteKey(key);
+                            continue;
+                        }
+                        // Now the retrieval process of the key begins
+                        String str = Functions.getLineFromFile(dbFilePath, key);
+                        int positionOfDelimeter = str.indexOf(DELIMITER);
+                        String EncodedValue = str.substring(positionOfDelimeter + 1);
+                        value = KeyValueDataStore.INSTANCE.getDecodedValue(EncodedValue);
+                        String KeyValPair = String.format("SUCCESS \n Key : %s, Value : %s", key, value);
+                        System.out.println(KeyValPair);
                         break;
 
                     case 3:
+                        // TODO for delete functionality
                         break;
 
                     case 4:
