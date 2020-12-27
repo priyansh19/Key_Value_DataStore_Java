@@ -172,6 +172,9 @@ public class KeyValueDataStore implements Serializable {
 
                     case 3:
                         // TODO for delete functionality
+                        // TODO : adding some error responses in read functionality
+                        // update feature will also be added in future; to make it a fully functional
+                        // crud operational data store
                         break;
 
                     case 4:
