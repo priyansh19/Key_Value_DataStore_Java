@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 // This file contains all the file handling functions along with processing on it 
@@ -70,20 +71,29 @@ public class Functions {
 		}
 	}
 
-	public static Map<String, String> getAllLinesFromFile(String dbFilePath) {
-		return null;
-	}
-
+	// there are 2 ways of locking a file while using thread safety functionality
+	// 1. using reentrantLock and locking it and unlockign it after a while
+	// 2. using object lock
 	public static String getLineFromFile(String filePath, String key) {
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith(key)) {
-					return line;
+		final Object lock = new Object();
+		try {
+			synchronized (lock) {
+				File readFile = new File(filePath);
+				BufferedReader reader = new BufferedReader(new FileReader(readFile));
+
+				String linetofind = key;
+				String currline;
+
+				while ((currline = reader.readLine()) != null) {
+					if (currline.startsWith(linetofind)) {
+						return currline;
+					}
 				}
+
+				reader.close();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			System.err.println(e);
 		}
 		return "";
 	}

@@ -69,6 +69,11 @@ public class KeyValueDataStore implements Serializable {
         System.err.println("FAILED: Key expired, So it is no longer accessible.");
     }
 
+    private void synchronizeDataStore(Map<String, String> metadataMap2, Map<String, String> keyMap2, String dbFilePath2,
+            String metaFilePath2) {
+
+    }
+
     public static void main(String[] args) {
         boolean terminate = false;
         while (!terminate) {
@@ -78,6 +83,10 @@ public class KeyValueDataStore implements Serializable {
                             + "Starting Application Again !! ... hold on ");
                     TimeUnit.SECONDS.sleep(2);
                 }
+                // on each restart on the data base it is necessary to re-synchronize the maps
+                // with files.
+                KeyValueDataStore.INSTANCE.synchronizeDataStore(metadataMap, keyMap, dbFilePath, metaFilePath);
+
                 System.out.println(
                         "\n<------------------- Welcome to Priyansh's Key-Value DataStore -------------------->");
                 System.out.println("Features in DataStore: \n" + "   Type 1 : (Create) To Create Key-Value pair. \n"
