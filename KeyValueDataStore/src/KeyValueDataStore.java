@@ -165,7 +165,7 @@ public class KeyValueDataStore implements Serializable {
                         int positionOfDelimeter = str.indexOf(DELIMITER);
                         String EncodedValue = str.substring(positionOfDelimeter + 1);
                         value = KeyValueDataStore.INSTANCE.getDecodedValue(EncodedValue);
-                        String KeyValPair = String.format("SUCCESS \n Key : %s, Value : %s", key, value);
+                        String KeyValPair = String.format("SUCCESS \n Key : Value is { %s : %s }", key, value);
                         System.out.println(KeyValPair);
                         break;
 
