@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 // This file contains all the file handling functions along with processing on it 
 public class Functions {
+	private static String DEL = ":";
 
 	public static boolean writeToFile(String filePath, Object value, boolean append)
 			throws InterruptedException, IOException {
@@ -40,17 +42,25 @@ public class Functions {
 		return true;
 	}
 
-	public static void deleteLineInFile(String filePath, String key) {
+	public static void deleteLineInFile(String filePath, String TrashPath, String key) {
+		try {
+			File inputFile = new File(filePath);
+			File tempFile = new File("tempfile.txt");
+			BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))));
-				PrintWriter pr = new PrintWriter(new BufferedWriter(new FileWriter(new File(filePath))))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.startsWith(key)) {
+			String lineToRemove = key;
+			String currentLine;
+
+			while ((currentLine = reader.readLine()) != null) {
+				// trim newline when comparing with lineToRemove
+				if (currentLine.startsWith(lineToRemove))
 					continue;
-				}
-				pr.println(line);
+				writer.write(currentLine + System.getProperty("line.separator"));
 			}
+			writer.close();
+			reader.close();
+			tempFile.renameTo(inputFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

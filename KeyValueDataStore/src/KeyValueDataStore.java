@@ -23,6 +23,7 @@ public class KeyValueDataStore implements Serializable {
 
     // fille paths for data storgae .. can only be changed from here
     private static String dbFilePath = System.getProperty("KeyValueDataStore.dbfilepath", "./data/db.txt");
+    private static String trashFilePath = System.getProperty("KeyValueDataStore.trashfilepath", "./data/trash.txt");
     private static String metaFilePath = System.getProperty("KeyValueDataStore.metafilepath", "./data/db-meta.txt");
     private static Integer defaultTTL = Integer.valueOf(System.getProperty("KeyValueDataStore.defaultTTL", "604800"));
     // 7 days equals to 604800 seconds
@@ -33,11 +34,6 @@ public class KeyValueDataStore implements Serializable {
     public static KeyValueDataStore getinstance() {
         return KeyValueDataStore.INSTANCE;
     }
-
-    // @SuppressWarnings("unused")
-    // private KeyValueDataStore readResolve() {
-    // return KeyValueDataStore.INSTANCE;
-    // }
 
     private String createKeyValue(String key, String value) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -58,24 +54,18 @@ public class KeyValueDataStore implements Serializable {
         return decodedStr;
     }
 
-    // private void preProcess(String dbFilePath, String metaFilePath) {
-    // this.createFile(dbFilePath);
-    // this.createFile(metaFilePath);
-    // this.keyMap = Functions.getAllLinesFromFile(dbFilePath);
-    // this.metadataMap = Functions.getAllLinesFromFile(metaFilePath);
-    // }
     private boolean DeleteKey(String key) {
-        Functions.deleteLineInFile(dbFilePath, key);
+        Functions.deleteLineInFile(dbFilePath, trashFilePath, key);
         keyMap.remove(key);
-        Functions.deleteLineInFile(metaFilePath, key);
+        Functions.deleteLineInFile(metaFilePath, trashFilePath, key);
         metadataMap.remove(key);
         return true;
     }
 
     private void DeleteKeybyTTL(String key) {
-        Functions.deleteLineInFile(dbFilePath, key);
+        Functions.deleteLineInFile(dbFilePath, trashFilePath, key);
         keyMap.remove(key);
-        Functions.deleteLineInFile(metaFilePath, key);
+        Functions.deleteLineInFile(metaFilePath, trashFilePath, key);
         metadataMap.remove(key);
         System.err.println("FAILED: Key expired, So it is no longer accessible.");
     }
@@ -208,3 +198,5 @@ public class KeyValueDataStore implements Serializable {
         }
     }
 }
+
+// TODO : Implement thread safety
