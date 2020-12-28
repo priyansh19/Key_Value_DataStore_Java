@@ -7,14 +7,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 // This file contains all the file handling functions along with processing on it 
 public class Functions {
-	private static String DEL = ":";
 
 	public static boolean writeToFile(String filePath, Object value, boolean append)
 			throws InterruptedException, IOException {
@@ -42,10 +43,13 @@ public class Functions {
 		return true;
 	}
 
-	public static void deleteLineInFile(String filePath, String TrashPath, String key) {
+	public static void deleteLineInFile(String filePath, String key) throws IOException {
+		final ReentrantLock lock = new ReentrantLock();
 		try {
+			lock.lock();
 			File inputFile = new File(filePath);
 			File tempFile = new File("tempfile.txt");
+
 			BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 			BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
@@ -61,8 +65,8 @@ public class Functions {
 			writer.close();
 			reader.close();
 			tempFile.renameTo(inputFile);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} finally {
+			lock.unlock();
 		}
 	}
 
