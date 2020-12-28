@@ -11,6 +11,7 @@ import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -96,6 +97,32 @@ public class Functions {
 			System.err.println(e);
 		}
 		return "";
+	}
+
+	public static TreeMap<String, String> synchronizeDataStore(TreeMap<String, String> Map, String filePath)
+			throws IOException {
+		String Del = ":";
+		TreeMap<String, String> h1 = new TreeMap<String, String>();
+		File file = new File(filePath);
+		if (!file.exists()) {
+			File folder = new File("data");
+			File f1 = new File(filePath);
+			folder.mkdir();
+			f1.createNewFile();
+			return h1;
+		} else {
+			BufferedReader reader = new BufferedReader(new FileReader(file));
+			String currLine;
+			while ((currLine = reader.readLine()) != null) {
+				String[] keyvalpair = currLine.split(Del);
+				if (keyvalpair.length > 2) {
+					continue;
+				} else {
+					h1.put(keyvalpair[0], keyvalpair[1]);
+				}
+			}
+			return h1;
+		}
 	}
 
 }
