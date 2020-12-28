@@ -1,10 +1,6 @@
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Map;
@@ -13,6 +9,7 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 public class KeyValueDataStore implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static int counter = 0;
     private static Scanner scanner = new Scanner(System.in);
     private static final KeyValueDataStore INSTANCE = new KeyValueDataStore();
@@ -67,13 +64,20 @@ public class KeyValueDataStore implements Serializable {
     // this.keyMap = Functions.getAllLinesFromFile(dbFilePath);
     // this.metadataMap = Functions.getAllLinesFromFile(metaFilePath);
     // }
-
-    private void DeleteKey(String key) {
+    private boolean DeleteKey(String key) {
         Functions.deleteLineInFile(dbFilePath, key);
         keyMap.remove(key);
         Functions.deleteLineInFile(metaFilePath, key);
         metadataMap.remove(key);
-        System.err.println("FAILED: Key expired and it has been removed from DataStore");
+        return true;
+    }
+
+    private void DeleteKeybyTTL(String key) {
+        Functions.deleteLineInFile(dbFilePath, key);
+        keyMap.remove(key);
+        Functions.deleteLineInFile(metaFilePath, key);
+        metadataMap.remove(key);
+        System.err.println("FAILED: Key expired, So it is no longer accessible.");
     }
 
     public static void main(String[] args) {
@@ -81,7 +85,7 @@ public class KeyValueDataStore implements Serializable {
         while (!terminate) {
             try {
                 if (counter > 0) {
-                    System.out.println("!------------------------------------------------------------------------! \n"
+                    System.out.println("\n!------------------------------------------------------------------------! \n"
                             + "Starting Application Again !! ... hold on ");
                     TimeUnit.SECONDS.sleep(2);
                 }
@@ -90,7 +94,7 @@ public class KeyValueDataStore implements Serializable {
                 System.out.println("Features in DataStore: \n" + "   Type 1 : (Create) To Create Key-Value pair. \n"
                         + "   Type 2 : (Read) To Read the Key-Value pair. \n"
                         + "   Type 3 : (Delete) To Delete the values by Key. \n"
-                        + "   Type 4 : To exit the application.");
+                        + "   Type Any Other Key : To exit the application.");
                 System.out.print("Enter your choice here:");
                 int input = scanner.nextInt();
                 scanner.nextLine();
@@ -138,7 +142,7 @@ public class KeyValueDataStore implements Serializable {
                                     KeyValueDataStore.INSTANCE.createKeyWithTTL(key, TTLVal), true);
                             metadataMap.put(key, TTLVal.toString());
                             if (result)
-                                System.out.println("--> SUCCESS: Key-Value pair has been added successfully");
+                                System.out.println("--> SUCCESS: Key-Value pair has been added successfully \n");
                         } else {
                             System.err.println(
                                     "--> FAILED! : Reason can be File doesn't have write permission or File is too big to append data.\n");
@@ -158,7 +162,7 @@ public class KeyValueDataStore implements Serializable {
                         }
                         TTLVal = Long.valueOf(metadataMap.get(key));
                         if (cal.getTimeInMillis() > TTLVal) {
-                            KeyValueDataStore.INSTANCE.DeleteKey(key);
+                            KeyValueDataStore.INSTANCE.DeleteKeybyTTL(key);
                             continue;
                         }
                         // Now the retrieval process of the key begins
@@ -171,20 +175,30 @@ public class KeyValueDataStore implements Serializable {
                         break;
 
                     case 3:
-                        // TODO for delete functionality
-                        // TODO : adding some error responses in read functionality
-                        // update feature will also be added in future; to make it a fully functional
-                        // crud operational data store
-                        break;
-
-                    case 4:
-                        System.out.println("Exiting now ...");
-                        terminate = true;
-                        TimeUnit.SECONDS.sleep(2);
+                        System.out.println("Enter the Key: ");
+                        key = scanner.nextLine();
+                        if (key == "") {
+                            System.err.println("--> FAILED! : Key field can't be empty. Try agian changing the key");
+                            continue;
+                        }
+                        if (!keyMap.containsKey(key)) {
+                            System.out.println(
+                                    "--> FAILED RETRIEVAL! : Key is not present in the data store. Try Again !");
+                            continue;
+                        }
+                        boolean status = KeyValueDataStore.INSTANCE.DeleteKey(key);
+                        if (status) {
+                            System.out.printf("--> SUCCESS! : Deleted %s Key from Data Store", key);
+                        } else {
+                            System.out.println("--> FAILED! : Reason unknown. Try Again !");
+                        }
                         break;
 
                     default:
                         System.out.println("OOPS !! wrong choice. Try again :)");
+                        System.out.println("Exiting now ...");
+                        terminate = true;
+                        TimeUnit.SECONDS.sleep(2);
                         break;
                 }
                 counter++;
