@@ -22,14 +22,6 @@ public class Functions {
 	public static boolean writeToFile(String filePath, Object value, boolean append)
 			throws InterruptedException, IOException {
 		File file = new File(filePath);
-		if (!file.exists()) {
-			System.out.println("File not exist !! .. Hold On a bit .. We are creating file at:" + filePath);
-			TimeUnit.SECONDS.sleep(2);
-			File folder = new File("data");
-			File f1 = new File(filePath);
-			folder.mkdir();
-			f1.createNewFile();
-		}
 		if (!file.canWrite() || (file.length() + (16 * 1024)) > 1073741824L)
 		// if File size + current data(16KB)
 		// exceeds 1 GB or File is not writable error
