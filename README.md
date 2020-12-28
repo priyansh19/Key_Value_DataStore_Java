@@ -44,7 +44,7 @@ This is a simple key_value datastore to implement few of the basic functionaliti
  - **Performance** : For faster retrieval, whenever our application starts, we will be reading from file and populate the ConcurrentHashMap. 2 Maps hold KeyValuePairs, KeyAndTTL info.
  - **Adaptability** : Provided a way to change default values through JVM flags
 
-# :Rocket: How to use the application:
+# :rocket: How to use the application:
 
 1) The Applications is based on REPL(Read, Eval, Print, Loop), an interactive commandline interface.
 2) It is a file-based key-value data store that supports the basic CRD (create, read, and delete)
