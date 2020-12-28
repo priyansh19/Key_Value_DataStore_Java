@@ -1,31 +1,20 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.channels.FileLock;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 // This file contains all the file handling functions along with processing on it 
 public class Functions {
 
-	public static boolean writeToFile(String filePath, Object value, boolean append)
-			throws InterruptedException, IOException {
+	public static boolean writeToFile(String filePath, Object value, boolean append) throws InterruptedException {
 		File file = new File(filePath);
-		if (!file.canWrite() || (file.length() + (16 * 1024)) > 1073741824L)
-		// if File size + current data(16KB)
-		// exceeds 1 GB or File is not writable error
-		{
+		if (!file.canWrite() || (file.length() + (16 * 1024)) > 1073741824L) { // if File size + current data(16KB)
+			// exceeds 1 GB or File is not writable error
 			return false;
 		}
 		try (PrintWriter pr = new PrintWriter(new BufferedWriter(new FileWriter(file, append)))) {
@@ -73,17 +62,14 @@ public class Functions {
 			synchronized (lock) {
 				File readFile = new File(filePath);
 				BufferedReader reader = new BufferedReader(new FileReader(readFile));
-
 				String linetofind = key;
 				String currline;
-
 				while ((currline = reader.readLine()) != null) {
 					if (currline.startsWith(linetofind)) {
+						reader.close();
 						return currline;
 					}
 				}
-
-				reader.close();
 			}
 		} catch (Exception e) {
 			System.err.println(e);
@@ -113,6 +99,7 @@ public class Functions {
 					h1.put(keyvalpair[0], keyvalpair[1]);
 				}
 			}
+			reader.close();
 			return h1;
 		}
 	}

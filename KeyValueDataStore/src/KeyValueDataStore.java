@@ -3,7 +3,6 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Calendar;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -92,15 +91,13 @@ public class KeyValueDataStore implements Serializable {
                 // re-synchronize the maps with files.
                 keyMap = Functions.synchronizeDataStore(keyMap, dbFilePath);
                 metadataMap = Functions.synchronizeDataStore(metadataMap, metaFilePath);
-
-                // sanity checking test cases
-                // TODO write a function to check map wiith files
-
                 scanner.nextLine();
+
                 // defining the inputs to be used for handling the key,value, TTL Value.
                 String key = null, value = null;
                 Long TTLVal = 0L;
                 Calendar cal = Calendar.getInstance();
+
                 switch (input) {
                     case 1:
                         System.out.println("Enter your Key:");
@@ -193,7 +190,7 @@ public class KeyValueDataStore implements Serializable {
                         break;
 
                     default:
-                        System.out.println("OOPS !! wrong choice. Try again :)");
+                        System.out.println("OOPS !! :)");
                         System.out.println("Exiting now ...");
                         terminate = true;
                         TimeUnit.SECONDS.sleep(2);
