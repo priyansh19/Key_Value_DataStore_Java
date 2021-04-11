@@ -78,7 +78,7 @@ public class KeyValueDataStore implements Serializable {
                     TimeUnit.SECONDS.sleep(2);
                 }
                 System.out.println(
-                        "\n<------------------- Welcome to Priyansh's Key-Value DataStore -------------------->");
+                        "\n<------------------- Key-Value DataStore -------------------->");
                 System.out.println("Features in DataStore: \n" + "   Type 1 : (Create) To Create Key-Value pair. \n"
                         + "   Type 2 : (Read) To Read the Key-Value pair. \n"
                         + "   Type 3 : (Delete) To Delete the values by Key. \n"
